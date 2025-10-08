@@ -16,6 +16,10 @@ class NotificationManager {
      * Create a notification for specific user(s)
      */
     public function create($userId, $title, $message, $type, $module, $options = []) {
+        return $this->createForUser($userId, $title, $message, $type, $module, $options);
+    }
+
+    public function createForUser($userId, $title, $message, $type, $module, $options = []) {
         try {
             $createdBy = $_SESSION['user_id'] ?? 1;
             $branchId = $_SESSION['branch_id'] ?? 1;

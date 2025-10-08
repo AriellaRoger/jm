@@ -3,12 +3,15 @@
 // Minimal request management controller
 
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/NotificationManager.php';
 
 class RequestController {
     private $conn;
+    private $notificationManager;
 
     public function __construct() {
         $this->conn = getDbConnection();
+        $this->notificationManager = new NotificationManager();
     }
 
     // Create new request with multiple items
@@ -50,6 +53,36 @@ class RequestController {
                     $item['notes'] ?? ''
                 ]);
             }
+
+            // Get branch name for notification
+            $branchSql = "SELECT name FROM branches WHERE id = ?";
+            $branchStmt = $this->conn->prepare($branchSql);
+            $branchStmt->execute([$data['branch_id']]);
+            $branch = $branchStmt->fetch(PDO::FETCH_ASSOC);
+            $branchName = $branch ? $branch['name'] : 'Unknown Branch';
+
+            // Get user name for notification
+            $userSql = "SELECT full_name FROM users WHERE id = ?";
+            $userStmt = $this->conn->prepare($userSql);
+            $userStmt->execute([$data['requested_by']]);
+            $user = $userStmt->fetch(PDO::FETCH_ASSOC);
+            $userName = $user ? $user['full_name'] : 'Unknown User';
+
+            // Notify administrators and supervisors about new stock request
+            $itemCount = count($data['items']);
+            $this->notificationManager->createForRole(
+                ['Administrator', 'Supervisor'],
+                'New Stock Request',
+                "{$userName} from {$branchName} requested {$itemCount} " . ($itemCount == 1 ? 'item' : 'items') . " (Request {$requestNumber})",
+                'APPROVAL_REQUIRED',
+                'REQUESTS',
+                [
+                    'entity_type' => 'request',
+                    'entity_id' => $requestId,
+                    'action_url' => '/inventory/index.php?tab=requests&view=' . $requestId,
+                    'is_urgent' => true
+                ]
+            );
 
             $this->conn->commit();
             return ['success' => true, 'request_number' => $requestNumber];
@@ -117,6 +150,15 @@ class RequestController {
         try {
             $status = ($action === 'confirm') ? 'CONFIRMED' : 'REJECTED';
 
+            // Get request details before updating
+            $detailsSql = "SELECT r.*, u.full_name as requested_by_name
+                          FROM requests r
+                          JOIN users u ON r.requested_by = u.id
+                          WHERE r.id = ?";
+            $detailsStmt = $this->conn->prepare($detailsSql);
+            $detailsStmt->execute([$requestId]);
+            $request = $detailsStmt->fetch(PDO::FETCH_ASSOC);
+
             $sql = "UPDATE requests
                     SET status = ?, processed_by = ?, processed_at = NOW(), response_notes = ?
                     WHERE id = ? AND status = 'PENDING'";
@@ -125,6 +167,23 @@ class RequestController {
             $stmt->execute([$status, $userId, $notes, $requestId]);
 
             if ($stmt->rowCount() > 0) {
+                // Notify the requester about the decision
+                $statusText = ($action === 'confirm') ? 'confirmed' : 'rejected';
+                $notificationType = ($action === 'confirm') ? 'SUCCESS' : 'ERROR';
+
+                $this->notificationManager->create(
+                    $request['requested_by'],
+                    "Stock Request {$statusText}",
+                    "Your stock request {$request['request_number']} has been {$statusText}",
+                    $notificationType,
+                    'REQUESTS',
+                    [
+                        'entity_type' => 'request',
+                        'entity_id' => $requestId,
+                        'action_url' => '/inventory/index.php?tab=requests&view=' . $requestId
+                    ]
+                );
+
                 return ['success' => true, 'message' => "Request {$status} successfully"];
             } else {
                 return ['success' => false, 'message' => 'Request not found or already processed'];

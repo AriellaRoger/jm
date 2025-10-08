@@ -239,6 +239,24 @@ class ExpenseController {
                 "Expense {$expense['expense_number']} rejected for {$expense['requester_name']}"
             ]);
 
+            // Get expense type for notification
+            $expenseType = $this->getExpenseTypeById($expense['expense_type_id']);
+
+            // Notify the expense requester about rejection
+            $this->notificationManager->createForUser(
+                $expense['user_id'],
+                'Expense Request Rejected',
+                "Your expense request {$expense['expense_number']} for TZS " . number_format($expense['amount'], 0) . " ({$expenseType['name']}) has been rejected. Reason: {$rejectionReason}",
+                'ERROR',
+                'EXPENSES',
+                [
+                    'entity_type' => 'expense',
+                    'entity_id' => $expenseId,
+                    'expense_number' => $expense['expense_number'],
+                    'action_url' => "/expenses/index.php?expense_id=$expenseId"
+                ]
+            );
+
             $this->pdo->commit();
             return ['success' => true];
         } catch (Exception $e) {

@@ -4,12 +4,15 @@
 // Handles order creation, approval workflow, and automatic sales conversion
 
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/NotificationManager.php';
 
 class OrderController {
     private $conn;
+    private $notificationManager;
 
     public function __construct() {
         $this->conn = Database::getInstance()->getConnection();
+        $this->notificationManager = new NotificationManager();
     }
 
     // Create new customer order
@@ -61,6 +64,35 @@ class OrderController {
                 $data['requested_by'],
                 'ORDER_CREATED',
                 "Customer order $orderNumber created"
+            );
+
+            // Get order details for notification
+            $customerSql = "SELECT name FROM customers WHERE id = ?";
+            $customerStmt = $this->conn->prepare($customerSql);
+            $customerStmt->execute([$data['customer_id']]);
+            $customer = $customerStmt->fetch(PDO::FETCH_ASSOC);
+            $customerName = $customer ? $customer['name'] : 'Unknown Customer';
+
+            $branchSql = "SELECT name FROM branches WHERE id = ?";
+            $branchStmt = $this->conn->prepare($branchSql);
+            $branchStmt->execute([$data['requesting_branch_id']]);
+            $branch = $branchStmt->fetch(PDO::FETCH_ASSOC);
+            $branchName = $branch ? $branch['name'] : 'Unknown Branch';
+
+            // Notify administrators and supervisors about new order
+            $itemCount = count($data['items'] ?? []) + count($data['bags'] ?? []);
+            $this->notificationManager->createForRole(
+                ['Administrator', 'Supervisor'],
+                'New Customer Order Received',
+                "Order {$orderNumber} from {$customerName} at {$branchName} with {$itemCount} items requires approval",
+                'APPROVAL_REQUIRED',
+                'ORDERS',
+                [
+                    'entity_type' => 'order',
+                    'entity_id' => $orderId,
+                    'action_url' => '/orders/index.php?view=' . $orderId,
+                    'is_urgent' => true
+                ]
             );
 
             $this->conn->commit();
@@ -141,6 +173,22 @@ class OrderController {
                 $approvedBy,
                 $action,
                 "Order {$order['order_number']} " . ($approve ? 'approved' : 'rejected')
+            );
+
+            // Notify the order requester
+            $statusText = $approve ? 'approved' : 'rejected';
+            $notificationType = $approve ? 'SUCCESS' : 'ERROR';
+            $this->notificationManager->create(
+                $order['requested_by'],
+                "Order {$statusText}",
+                "Your order {$order['order_number']} has been {$statusText}",
+                $notificationType,
+                'ORDERS',
+                [
+                    'entity_type' => 'order',
+                    'entity_id' => $orderId,
+                    'action_url' => '/orders/index.php?view=' . $orderId
+                ]
             );
 
             $this->conn->commit();

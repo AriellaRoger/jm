@@ -17,9 +17,19 @@ $userRole = $isLoggedIn ? $_SESSION['user_role'] : '';
 $userName = $isLoggedIn ? $_SESSION['user_name'] : '';
 $branchName = $isLoggedIn ? $_SESSION['branch_name'] : '';
 
-// Notifications temporarily disabled for system stability
+// Get user notifications
 $notifications = [];
 $unreadCount = 0;
+if ($isLoggedIn) {
+    try {
+        require_once __DIR__ . '/../controllers/NotificationManager.php';
+        $notificationManager = new NotificationManager();
+        $notifications = $notificationManager->getForUser($_SESSION['user_id'], 10);
+        $unreadCount = $notificationManager->getUnreadCount($_SESSION['user_id']);
+    } catch (Exception $e) {
+        error_log("Error loading notifications: " . $e->getMessage());
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
