@@ -1,0 +1,236 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt - RCP20250923020002</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 5mm;
+            font-size: 12px;
+            line-height: 1.2;
+            color: #000;
+            background: white;
+        }
+        .receipt {
+            width: 80mm;
+            margin: 0 auto;
+            background: white;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 8px;
+            border-bottom: 1px dashed #333;
+            padding-bottom: 5px;
+        }
+        .company-name {
+            font-size: 16px;
+            font-weight: bold;
+            margin: 0;
+        }
+        .company-info {
+            font-size: 10px;
+            margin: 2px 0;
+        }
+        .receipt-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        .info-section {
+            margin-bottom: 8px;
+            font-size: 11px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 1px 0;
+        }
+        .items-section {
+            margin-bottom: 8px;
+            border-bottom: 1px dashed #333;
+            padding-bottom: 5px;
+        }
+        .item-row {
+            margin: 2px 0;
+            font-size: 10px;
+        }
+        .item-name {
+            font-weight: bold;
+        }
+        .item-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+        }
+        .serial-info {
+            font-size: 8px;
+            color: #666;
+            margin-left: 5px;
+        }
+        .totals-section {
+            margin-bottom: 8px;
+            font-size: 11px;
+        }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 1px 0;
+        }
+        .grand-total {
+            font-weight: bold;
+            border-top: 1px solid #333;
+            padding-top: 2px;
+            font-size: 12px;
+        }
+        .payment-section {
+            margin-bottom: 8px;
+            font-size: 11px;
+            border-bottom: 1px dashed #333;
+            padding-bottom: 5px;
+        }
+        .qr-section {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .qr-code {
+            width: 50px;
+            height: 50px;
+            margin: 5px auto;
+        }
+        .footer {
+            text-align: center;
+            font-size: 8px;
+            color: #666;
+            margin-top: 8px;
+            border-top: 1px dashed #333;
+            padding-top: 5px;
+        }
+        @media print {
+            .no-print { display: none; }
+            body { margin: 0; }
+            .receipt { margin: 0; width: 100%; }
+        }
+        @page {
+            margin: 5mm;
+            size: 80mm auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print" style="margin-bottom: 10px; text-align: center;">
+        <button onclick="window.print()" style="padding: 8px 16px; background: #2c5282; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px;">
+            🖨️ Print Receipt
+        </button>
+        <button onclick="window.close()" style="padding: 8px 16px; background: #e53e3e; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            ✕ Close
+        </button>
+    </div>
+
+    <div class="receipt">
+        <div class="header">
+            <h1 class="company-name">JM ANIMAL FEEDS</h1>
+            <div class="company-info">Premium Animal Nutrition</div>
+            <div class="company-info">📞 +255 XXX XXX XXX</div>
+            <div class="company-info">📧 info@jmfeeds.co.tz</div>
+            <h2 class="receipt-title">SALES RECEIPT</h2>
+        </div>
+
+        <div class="info-section">
+            <div class="info-row">
+                <span>Receipt #:</span>
+                <strong>RCP20250923020002</strong>
+            </div>
+            <div class="info-row">
+                <span>Sale #:</span>
+                <span>SALE20250923020002</span>
+            </div>
+            <div class="info-row">
+                <span>Date:</span>
+                <span>Sep 23, 2025 14:52</span>
+            </div>
+            <div class="info-row">
+                <span>Customer:</span>
+                <span>test customer 1</span>
+            </div>
+            <div class="info-row">
+                <span>Phone:</span>
+                <span>01234567890</span>
+            </div>
+            <div class="info-row">
+                <span>Branch:</span>
+                <span>Makabe Branch</span>
+            </div>
+            <div class="info-row">
+                <span>Cashier:</span>
+                <span>Juliet Juliet</span>
+            </div>
+        </div>
+
+        <div class="items-section">
+            <div style="font-weight: bold; margin-bottom: 5px;">ITEMS PURCHASED:</div>
+                        <div class="item-row">
+                <div class="item-name">Test Product 50 Kg (50KG)</div>
+                <div class="item-details">
+                    <span>1.00 Bag × TZS 90,000</span>
+                    <span>TZS 90,000</span>
+                </div>
+                                    <div class="serial-info">
+                        Serial:                     </div>
+                                            </div>
+                        <div class="item-row">
+                <div class="item-name">Test Product 50 Kg (50KG)</div>
+                <div class="item-details">
+                    <span>5.00 KG × TZS 2,000</span>
+                    <span>TZS 10,000</span>
+                </div>
+                                    <div class="serial-info">
+                        Serial: JM-20250922-7-0001                    </div>
+                                                    <div class="serial-info">
+                        Loose Weight from Bag: JM-20250922-7-0001                    </div>
+                            </div>
+                    </div>
+
+        <div class="totals-section">
+            <div class="total-row">
+                <span>Subtotal:</span>
+                <span>TZS 100,000</span>
+            </div>
+                                    <div class="total-row grand-total">
+                <span>TOTAL:</span>
+                <span>TZS 100,000</span>
+            </div>
+        </div>
+
+        <div class="payment-section">
+            <div class="info-row">
+                <span>Payment Method:</span>
+                <span>CASH</span>
+            </div>
+                        <div class="info-row">
+                <span>Sale Type:</span>
+                <span style="">
+                    CASH                </span>
+            </div>
+                    </div>
+
+        <div class="qr-section">
+                            <img src="/jmerp/assets/qrcodes/receipt_RCP20250923020002.png?1758653537" alt="Receipt QR" class="qr-code">
+                        <div style="font-size: 8px;">Scan to verify receipt</div>
+        </div>
+
+        <div class="footer">
+            <p><strong>Thank you for your business!</strong></p>
+            <p>For inquiries, call: +255 XXX XXX XXX</p>
+            <p>Email: support@jmfeeds.co.tz</p>
+            <p style="margin-top: 5px;">This is your official receipt</p>
+            <p>Generated: 2025-09-23 18:52:17</p>
+        </div>
+    </div>
+
+</body>
+</html>
+
